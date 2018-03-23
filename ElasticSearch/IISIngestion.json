@@ -1,0 +1,50 @@
+PUT _ingest/pipeline/iis_w3c
+{
+  "description": "iis-w3c",
+  "processors": [
+    {
+      "grok": {
+        "field": "message",
+        "patterns": ["%{TIMESTAMP_ISO8601:date_time} %{IP:s_ip} %{WORD:cs_method} %{GREEDYDATA:cs_uri_stem} %{GREEDYDATA:cs_uri_query} %{NUMBER:s_port} %{NOTSPACE:cs_username} %{IPORHOST:c_ip} %{NOTSPACE:cs_user_agent} %{NOTSPACE:cs_host} %{NUMBER:sc_status} %{NUMBER:sc_substatus} %{NUMBER:sc_win32_status} %{NUMBER:sc_bytes} %{NUMBER:cs_bytes} %{NUMBER:time_taken}"]
+      }
+    },
+    {
+      "date": {
+        "field": "date_time",
+        "formats": [ "yyyy-MM-dd HH:mm:ss" ]
+      }
+    },
+      {
+        "geoip": {
+          "field": "c_ip",
+          "properties" : [
+            "continent_name",
+            "country_name",
+            "location"
+          ]
+        }
+      },
+      {
+        "user_agent": {
+          "field": "cs_user_agent",
+          "properties" : [
+            "device",
+            "name"
+          ]
+        }
+      },
+      {
+        "remove": {
+          "field": ["s_port", "cs_bytes", "date_time","c_ip", "beat.hostname", "beat.name", "beat.version", "cs_method", "cs_uri_query", "cs_user_agent", "cs_username", "input_type", "message", "offset", "s_ip", "sc_substatus", "sc_win32_status", "source", "type"]
+        }
+      }
+  ],
+  "on_failure" : [
+    {
+      "set" : {
+        "field" : "error",
+        "value" : "{{ _ingest.on_failure_message }}"
+      }
+    }
+  ]
+}

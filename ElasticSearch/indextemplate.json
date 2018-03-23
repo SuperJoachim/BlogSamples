@@ -1,0 +1,13 @@
+PUT _template/iistemplate
+{
+"index_patterns" : ["iis*"],
+"mappings": {
+    "doc": { 
+    "properties": { 
+        "sc_bytes": { "type": "integer"  },
+        "time_taken": { "type": "integer" },
+        "geoip.location": { "type": "geo_point"}
+    }
+    }
+}
+}
